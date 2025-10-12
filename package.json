@@ -1,0 +1,24 @@
+{
+  "name": "it-da-front",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.50.0",
+    "eslint-plugin-react": "^7.33.2",
+    "typescript": "^5.5.0",
+    "vite": "^5.1.0"
+  }
+}

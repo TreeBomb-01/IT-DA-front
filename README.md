@@ -25,6 +25,6 @@
 - 공모전 정보
 - 커뮤니티
 
-프론트 React + vite
+프론트 React + vite -> vibe coding
 
-마지막 수정일자 : 2025-07-16
+README 수정일자 : 2025-10-12
