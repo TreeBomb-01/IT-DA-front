@@ -7,11 +7,18 @@ import Register from '../pages/Register'
 export default function AppRouter() {
   return (
     <div>
-      <nav style={{padding: 12, borderBottom: '1px solid #e5e7eb'}}>
-        <Link to="/" style={{marginRight:12}}>Main</Link>
-        <Link to="/login" style={{marginRight:12}}>Login</Link>
-  <Link to="/register">regiter</Link>
-      </nav>
+      <header className="app-header">
+        <div className="app-logo">
+          <a href="/">
+            <img src="/img/logo.png" alt="logo" style={{height:40}} />
+          </a>
+        </div>
+        <nav className="app-nav">
+          <Link to="/" className="nav-link">Main</Link>
+          <Link to="/login" className="nav-link">Login</Link>
+          <Link to="/register" className="nav-link">regiter</Link>
+        </nav>
+      </header>
       <main style={{padding: 16}}>
         <Routes>
           <Route path="/" element={<Main/>} />
