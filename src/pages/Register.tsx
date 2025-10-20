@@ -1,24 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  useCheckEmailDuplicate,
+  useSendVerificationCode,
+  useVerifyCode,
+  useSignUp,
+} from '../api/userApi'
+import { useAuthStore } from '../store/useAuthStore'
 
 export default function Register() {
+  const navigate = useNavigate()
+  const { setAuth } = useAuthStore()
+
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
-  
+  const [ticket, setTicket] = useState('')
+
   const [isEmailChecked, setIsEmailChecked] = useState(false)
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [isCodeSent, setIsCodeSent] = useState(false)
-  
+
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [codeError, setCodeError] = useState('')
-  
-  const [verificationTimeLeft, setVerificationTimeLeft] = useState(0) // 인증코드 입력 제한시간 (5분)
-  const [resendCooldown, setResendCooldown] = useState(0) // 재전송 쿨타임 (1분)
+
+  const [verificationTimeLeft, setVerificationTimeLeft] = useState(0)
+  const [resendCooldown, setResendCooldown] = useState(0)
   const verificationTimerRef = useRef<number | null>(null)
   const resendTimerRef = useRef<number | null>(null)
+
+  // Mutation hooks
+  const checkEmailMutation = useCheckEmailDuplicate()
+  const sendCodeMutation = useSendVerificationCode()
+  const verifyCodeMutation = useVerifyCode()
+  const signUpMutation = useSignUp()
 
   // 타이머 정리
   useEffect(() => {
@@ -34,21 +52,12 @@ export default function Register() {
 
   // 인증코드 입력 제한시간 타이머 시작 (5분)
   const startVerificationTimer = () => {
-    // 기존 타이머가 있으면 정리
-    if (verificationTimerRef.current) {
-      clearInterval(verificationTimerRef.current)
-    }
-
-    // 5분(300초) 설정
+    if (verificationTimerRef.current) clearInterval(verificationTimerRef.current)
     setVerificationTimeLeft(300)
-
     verificationTimerRef.current = window.setInterval(() => {
       setVerificationTimeLeft((prev) => {
         if (prev <= 1) {
-          if (verificationTimerRef.current) {
-            clearInterval(verificationTimerRef.current)
-            verificationTimerRef.current = null
-          }
+          if (verificationTimerRef.current) clearInterval(verificationTimerRef.current)
           return 0
         }
         return prev - 1
@@ -58,21 +67,12 @@ export default function Register() {
 
   // 재전송 쿨타임 타이머 시작 (1분)
   const startResendCooldown = () => {
-    // 기존 타이머가 있으면 정리
-    if (resendTimerRef.current) {
-      clearInterval(resendTimerRef.current)
-    }
-
-    // 1분(60초) 설정
+    if (resendTimerRef.current) clearInterval(resendTimerRef.current)
     setResendCooldown(60)
-
     resendTimerRef.current = window.setInterval(() => {
       setResendCooldown((prev) => {
         if (prev <= 1) {
-          if (resendTimerRef.current) {
-            clearInterval(resendTimerRef.current)
-            resendTimerRef.current = null
-          }
+          if (resendTimerRef.current) clearInterval(resendTimerRef.current)
           return 0
         }
         return prev - 1
@@ -88,66 +88,69 @@ export default function Register() {
   }
 
   // 이메일 중복 확인
-  const handleCheckEmailDuplicate = async () => {
+  const handleCheckEmailDuplicate = () => {
     if (!email) {
       setEmailError('이메일을 입력해주세요')
       return
     }
-    
-    try {
-      // TODO: API 연동
-      // const response = await checkEmailDuplicate(email)
-      
-      // 임시 로직
-      setIsEmailChecked(true)
-      setEmailError('')
-      alert('사용 가능한 이메일입니다')
-    } catch (error) {
-      setEmailError('이미 사용 중인 이메일입니다')
-      setIsEmailChecked(false)
-    }
+    checkEmailMutation.mutate(email, {
+      onSuccess: () => {
+        setIsEmailChecked(true)
+        setEmailError('')
+        alert('사용 가능한 이메일입니다.')
+      },
+      onError: (error) => {
+        setEmailError(error.message || '이미 사용 중인 이메일입니다.')
+        setIsEmailChecked(false)
+      },
+    })
   }
 
   // 인증코드 전송
-  const handleSendVerificationCode = async () => {
+  const handleSendVerificationCode = () => {
     if (!isEmailChecked) {
       alert('이메일 중복 확인을 먼저 진행해주세요')
       return
     }
-    
-    try {
-      // TODO: API 연동
-      // const response = await sendVerificationCode(email)
-      
-      setIsCodeSent(true)
-      setCodeError('')
-      setVerificationCode('')
-      startVerificationTimer() // 인증코드 입력 제한시간 타이머 시작 (5분)
-      startResendCooldown() // 재전송 쿨타임 타이머 시작 (1분)
-      alert('인증코드가 전송되었습니다')
-    } catch (error) {
-      setCodeError('인증코드 전송에 실패했습니다')
-    }
+    sendCodeMutation.mutate(email, {
+      onSuccess: () => {
+        setIsCodeSent(true)
+        setCodeError('')
+        setVerificationCode('')
+        startVerificationTimer()
+        startResendCooldown()
+        alert('인증코드가 전송되었습니다.')
+      },
+      onError: (error) => {
+        setCodeError(error.message || '인증코드 전송에 실패했습니다.')
+      },
+    })
   }
 
   // 인증코드 확인
-  const handleVerifyCode = async () => {
+  const handleVerifyCode = () => {
     if (!verificationCode) {
       setCodeError('인증코드를 입력해주세요')
       return
     }
-    
-    try {
-      // TODO: API 연동
-      // const response = await verifyCode(email, verificationCode)
-      
-      setIsEmailVerified(true)
-      setCodeError('')
-      alert('이메일 인증이 완료되었습니다')
-    } catch (error) {
-      setCodeError('인증코드가 일치하지 않습니다')
-      setIsEmailVerified(false)
-    }
+    verifyCodeMutation.mutate(
+      { email, code: verificationCode },
+      {
+        onSuccess: (data) => {
+          if (verificationTimerRef.current) clearInterval(verificationTimerRef.current)
+          setVerificationTimeLeft(0)
+          
+          setTicket(data.ticket)
+          setIsEmailVerified(true)
+          setCodeError('')
+          alert('이메일 인증이 완료되었습니다.')
+        },
+        onError: (error) => {
+          setCodeError(error.message || '인증코드가 일치하지 않습니다.')
+          setIsEmailVerified(false)
+        },
+      }
+    )
   }
 
   // 비밀번호 확인 체크
@@ -163,23 +166,38 @@ export default function Register() {
   // 회원가입 제출
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!name || !email || !password || !passwordConfirm) {
       alert('모든 항목을 입력해주세요')
       return
     }
-    
     if (!isEmailVerified) {
       alert('이메일 인증을 완료해주세요')
       return
     }
-    
     if (!checkPasswordMatch()) {
       return
     }
-    
-    // TODO: 회원가입 API 호출
-    console.log('회원가입:', { name, email, password })
+
+    signUpMutation.mutate(
+      { name, email, password: password, ticket },
+      {
+        onSuccess: (data) => {
+          // 회원가입 성공 후 로그인 페이지로 이동
+          alert('회원가입이 완료되었습니다! 로그인해주세요.')
+          navigate('/login')
+          
+          // 또는 회원가입 후 자동 로그인을 원하면:
+          // if (data.accessToken) {
+          //   setAuth({ id: data.userId, name, email }, data.accessToken)
+          //   navigate('/')
+          // }
+        },
+        onError: (error) => {
+          alert(`회원가입에 실패했습니다: ${error.message}`)
+        },
+      }
+    )
   }
 
   return (
@@ -216,10 +234,10 @@ export default function Register() {
             <button 
               type="button"
               onClick={handleCheckEmailDuplicate}
-              disabled={isEmailVerified}
+              disabled={isEmailVerified || checkEmailMutation.isPending}
               style={{padding:'8px 16px', whiteSpace:'nowrap'}}
             >
-              중복 확인
+              {checkEmailMutation.isPending ? '확인 중...' : '중복 확인'}
             </button>
           </div>
           {emailError && <p style={{color:'red', fontSize:12, margin:'4px 0 0 0'}}>{emailError}</p>}
@@ -234,20 +252,22 @@ export default function Register() {
             <button 
               type="button"
               onClick={handleSendVerificationCode}
-              disabled={resendCooldown > 0}
+              disabled={resendCooldown > 0 || sendCodeMutation.isPending}
               style={{
                 padding:'8px 16px', 
                 width:'100%', 
                 marginBottom:8,
-                cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
-                opacity: resendCooldown > 0 ? 0.6 : 1
+                cursor: (resendCooldown > 0 || sendCodeMutation.isPending) ? 'not-allowed' : 'pointer',
+                opacity: (resendCooldown > 0 || sendCodeMutation.isPending) ? 0.6 : 1
               }}
             >
-              {resendCooldown > 0 
-                ? `재전송 대기 중 (${formatTime(resendCooldown)})` 
-                : isCodeSent 
-                  ? '인증코드 재전송' 
-                  : '인증코드 받기'
+              {sendCodeMutation.isPending 
+                ? '전송 중...'
+                : resendCooldown > 0 
+                  ? `재전송 대기 중 (${formatTime(resendCooldown)})` 
+                  : isCodeSent 
+                    ? '인증코드 재전송' 
+                    : '인증코드 받기'
               }
             </button>
           </div>
@@ -279,13 +299,14 @@ export default function Register() {
               <button 
                 type="button"
                 onClick={handleVerifyCode}
+                disabled={verifyCodeMutation.isPending}
                 style={{padding:'8px 16px', whiteSpace:'nowrap'}}
               >
-                확인
+                {verifyCodeMutation.isPending ? '확인 중...' : '확인'}
               </button>
             </div>
             {codeError && <p style={{color:'red', fontSize:12, margin:'4px 0 0 0'}}>{codeError}</p>}
-            {verificationTimeLeft === 0 && <p style={{color:'orange', fontSize:12, margin:'4px 0 0 0'}}>⚠ 인증 시간이 만료되었습니다. 인증코드를 재전송해주세요.</p>}
+            {verificationTimeLeft === 0 && isCodeSent && !isEmailVerified && <p style={{color:'orange', fontSize:12, margin:'4px 0 0 0'}}>⚠ 인증 시간이 만료되었습니다. 인증코드를 재전송해주세요.</p>}
           </div>
         )}
 
@@ -325,9 +346,16 @@ export default function Register() {
 
         <button 
           type="submit"
-          style={{width:'100%', padding:'12px', fontSize:16, cursor:'pointer'}}
+          disabled={signUpMutation.isPending || !isEmailVerified}
+          style={{
+            width:'100%', 
+            padding:'12px', 
+            fontSize:16, 
+            cursor: (signUpMutation.isPending || !isEmailVerified) ? 'not-allowed' : 'pointer',
+            opacity: (signUpMutation.isPending || !isEmailVerified) ? 0.6 : 1
+          }}
         >
-          회원가입
+          {signUpMutation.isPending ? '가입 진행 중...' : '회원가입'}
         </button>
       </form>
     </div>

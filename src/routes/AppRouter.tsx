@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import Main from '../pages/Main'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
@@ -8,9 +8,27 @@ import Teambuilding from '../pages/Teambuilding'
 import Community from '../pages/Community'
 import MyPage from '../pages/MyPage'
 import { useAuthStore } from '../store/useAuthStore'
+import { useLogout } from '../api/userApi'
 
 export default function AppRouter() {
-  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
+  const { user, isLoggedIn, clearAuth } = useAuthStore()
+  const logoutMutation = useLogout()
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        clearAuth()
+        alert('로그아웃되었습니다.')
+        navigate('/login')
+      },
+      onError: (error: any) => {
+        clearAuth()
+        console.error('로그아웃 요청 실패:', error)
+        navigate('/login')
+      },
+    })
+  }
 
   return (
     <div>
@@ -19,11 +37,19 @@ export default function AppRouter() {
         <div className="top-banner-inner">
           <div />
           <div className="top-links">
-            {user ? (
+            {isLoggedIn && user ? (
               <>
-                <span className="greeting">{user.name}님 안녕하세요</span>
-                <Link to="/mypage" className="top-link">MyPage</Link>
-                <button className="top-link btn-logout" onClick={logout}>로그아웃</button>
+                <span className="greeting">
+                  <span style={{ color: '#4DB6AC', fontWeight: 'bold' }}>{user.nickname}</span>님 환영합니다
+                </span>
+                <Link to="/mypage" className="top-link">마이페이지</Link>
+                <button 
+                  className="top-link btn-logout" 
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                >
+                  {logoutMutation.isPending ? '로그아웃 중...' : '로그아웃'}
+                </button>
               </>
             ) : (
               <>
