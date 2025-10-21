@@ -3,6 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import Main from '../pages/Main'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
+import Projects from '../pages/Projects'
 import Contests from '../pages/Contests'
 import Teambuilding from '../pages/Teambuilding'
 import Community from '../pages/Community'
@@ -48,9 +49,9 @@ export default function AppRouter() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/projects')}
               className={`transition-colors pb-1 ${
-                location.pathname === '/' 
+                location.pathname === '/projects' 
                   ? 'text-sky-600 font-bold border-b-2 border-sky-600' 
                   : 'text-slate-600 hover:text-sky-600'
               }`}
@@ -143,6 +144,7 @@ export default function AppRouter() {
           <Route path="/" element={<Main/>} />
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>} />
+          <Route path="/projects" element={<Projects/>} />
           <Route path="/contests" element={<Contests/>} />
           <Route path="/teambuilding" element={<Teambuilding/>} />
           <Route path="/community" element={<Community/>} />
@@ -165,7 +167,7 @@ export default function AppRouter() {
               <h4 className="font-semibold mb-3">바로가기</h4>
               <ul className="space-y-2 text-slate-400">
                 <li>
-                  <button onClick={() => navigate('/')} className="hover:text-white">
+                  <button onClick={() => navigate('/projects')} className="hover:text-white">
                     프로젝트 찾기
                   </button>
                 </li>
@@ -180,7 +182,7 @@ export default function AppRouter() {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/community')} className="hover:text-white">
+                  <button onClick={() => navigate('/')} className="hover:text-white">
                     서비스 소개
                   </button>
                 </li>
