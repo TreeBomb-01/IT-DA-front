@@ -1,8 +1,9 @@
 import React from 'react'
-import { Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import Main from '../pages/Main'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
+import Projects from '../pages/Projects'
 import Contests from '../pages/Contests'
 import Teambuilding from '../pages/Teambuilding'
 import Community from '../pages/Community'
@@ -12,6 +13,7 @@ import { useLogout } from '../api/userApi'
 
 export default function AppRouter() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, isLoggedIn, clearAuth } = useAuthStore()
   const logoutMutation = useLogout()
 
@@ -47,22 +49,44 @@ export default function AppRouter() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <button
-              onClick={() => navigate('/contests')}
-              className="text-slate-600 hover:text-sky-600 transition-colors font-medium"
+              onClick={() => navigate('/projects')}
+              className={`transition-colors pb-1 ${
+                location.pathname === '/projects' 
+                  ? 'text-sky-600 font-bold border-b-2 border-sky-600' 
+                  : 'text-slate-600 hover:text-sky-600'
+              }`}
             >
-              공모전/대회
+              프로젝트 찾기
             </button>
             <button
               onClick={() => navigate('/teambuilding')}
-              className="text-slate-600 hover:text-sky-600 transition-colors font-medium"
+              className={`transition-colors pb-1 ${
+                location.pathname === '/teambuilding' 
+                  ? 'text-sky-600 font-bold border-b-2 border-sky-600' 
+                  : 'text-slate-600 hover:text-sky-600'
+              }`}
             >
-              팀빌딩
+              팀원 찾아보기
+            </button>
+            <button
+              onClick={() => navigate('/contests')}
+              className={`transition-colors pb-1 ${
+                location.pathname === '/contests' 
+                  ? 'text-sky-600 font-bold border-b-2 border-sky-600' 
+                  : 'text-slate-600 hover:text-sky-600'
+              }`}
+            >
+              공모전 정보
             </button>
             <button
               onClick={() => navigate('/community')}
-              className="text-slate-600 hover:text-sky-600 transition-colors font-medium"
+              className={`transition-colors pb-1 ${
+                location.pathname === '/community' 
+                  ? 'text-sky-600 font-bold border-b-2 border-sky-600' 
+                  : 'text-slate-600 hover:text-sky-600'
+              }`}
             >
-              커뮤니티
+              포트폴리오
             </button>
           </div>
 
@@ -120,12 +144,76 @@ export default function AppRouter() {
           <Route path="/" element={<Main/>} />
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>} />
+          <Route path="/projects" element={<Projects/>} />
           <Route path="/contests" element={<Contests/>} />
           <Route path="/teambuilding" element={<Teambuilding/>} />
           <Route path="/community" element={<Community/>} />
           <Route path="/mypage" element={<MyPage/>} />
         </Routes>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-slate-800 text-white mt-16">
+        <div className="container mx-auto px-6 py-12">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-2">IT-DA</h3>
+              <p className="text-slate-400">
+                성장하는 개발자와 디자이너를 위한
+                <br /> 최고의 협업 커뮤니티
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">바로가기</h4>
+              <ul className="space-y-2 text-slate-400">
+                <li>
+                  <button onClick={() => navigate('/projects')} className="hover:text-white">
+                    프로젝트 찾기
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/teambuilding')} className="hover:text-white">
+                    팀원 찾기
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/contests')} className="hover:text-white">
+                    공모전
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/')} className="hover:text-white">
+                    서비스 소개
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">고객지원</h4>
+              <ul className="space-y-2 text-slate-400">
+                <li>
+                  <button onClick={() => {}} className="hover:text-white">
+                    이용약관
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => {}} className="hover:text-white">
+                    개인정보처리방침
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => {}} className="hover:text-white">
+                    문의하기
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 border-t border-slate-700 pt-8 text-center text-slate-500 text-sm">
+            &copy; 2025 IT-DA. All Rights Reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
