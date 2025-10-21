@@ -186,12 +186,6 @@ export default function Register() {
           // 회원가입 성공 후 로그인 페이지로 이동
           alert('회원가입이 완료되었습니다! 로그인해주세요.')
           navigate('/login')
-          
-          // 또는 회원가입 후 자동 로그인을 원하면:
-          // if (data.accessToken) {
-          //   setAuth({ id: data.userId, name, email }, data.accessToken)
-          //   navigate('/')
-          // }
         },
         onError: (error) => {
           alert(`회원가입에 실패했습니다: ${error.message}`)
@@ -201,163 +195,206 @@ export default function Register() {
   }
 
   return (
-    <div style={{maxWidth:480, padding:20}}>
-      <h2>회원가입</h2>
-      <form onSubmit={handleSubmit}>
-        {/* 이름 입력 */}
-        <div style={{marginBottom:16}}>
-          <label style={{display:'block', marginBottom:4}}>이름</label>
-          <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{width:'100%', padding:8, boxSizing:'border-box'}} 
-          />
-        </div>
+    <div className="bg-slate-50 min-h-screen">
+      <main className="flex items-center justify-center min-h-screen px-4 py-12">
+        <div className="w-full max-w-lg">
+          <div className="bg-white p-8 md:p-10 rounded-xl shadow-lg border border-slate-200">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-slate-800">IT-DA 회원가입</h1>
+              <p className="text-slate-500 mt-2 text-sm">새로운 성장의 기회를 '잇다'</p>
+            </div>
 
-        {/* 이메일 입력 및 중복 확인 */}
-        <div style={{marginBottom:16}}>
-          <label style={{display:'block', marginBottom:4}}>이메일</label>
-          <div style={{display:'flex', gap:8}}>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value)
-                setIsEmailChecked(false)
-                setIsCodeSent(false)
-                setIsEmailVerified(false)
-              }}
-              style={{flex:1, padding:8, boxSizing:'border-box'}} 
-              disabled={isEmailVerified}
-            />
-            <button 
-              type="button"
-              onClick={handleCheckEmailDuplicate}
-              disabled={isEmailVerified || checkEmailMutation.isPending}
-              style={{padding:'8px 16px', whiteSpace:'nowrap'}}
-            >
-              {checkEmailMutation.isPending ? '확인 중...' : '중복 확인'}
-            </button>
-          </div>
-          {emailError && <p style={{color:'red', fontSize:12, margin:'4px 0 0 0'}}>{emailError}</p>}
-          {isEmailChecked && !emailError && (
-            <p style={{color:'green', fontSize:12, margin:'4px 0 0 0'}}>✓ 사용 가능한 이메일입니다</p>
-          )}
-        </div>
+            {/* Register Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* 이름 */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+                  이름
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500"
+                  required
+                />
+              </div>
 
-        {/* 인증코드 전송 */}
-        {isEmailChecked && !isEmailVerified && (
-          <div style={{marginBottom:16}}>
-            <button 
-              type="button"
-              onClick={handleSendVerificationCode}
-              disabled={resendCooldown > 0 || sendCodeMutation.isPending}
-              style={{
-                padding:'8px 16px', 
-                width:'100%', 
-                marginBottom:8,
-                cursor: (resendCooldown > 0 || sendCodeMutation.isPending) ? 'not-allowed' : 'pointer',
-                opacity: (resendCooldown > 0 || sendCodeMutation.isPending) ? 0.6 : 1
-              }}
-            >
-              {sendCodeMutation.isPending 
-                ? '전송 중...'
-                : resendCooldown > 0 
-                  ? `재전송 대기 중 (${formatTime(resendCooldown)})` 
-                  : isCodeSent 
-                    ? '인증코드 재전송' 
-                    : '인증코드 받기'
-              }
-            </button>
-          </div>
-        )}
+              {/* 이메일 */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+                  이메일
+                </label>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      setIsEmailChecked(false)
+                      setIsCodeSent(false)
+                      setIsEmailVerified(false)
+                      setEmailError('')
+                    }}
+                    disabled={isEmailVerified}
+                    className="flex-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500 disabled:bg-slate-100"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCheckEmailDuplicate}
+                    disabled={isEmailVerified || checkEmailMutation.isPending}
+                    className="bg-slate-200 text-slate-700 px-4 py-2 rounded-md hover:bg-slate-300 transition-colors whitespace-nowrap text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {checkEmailMutation.isPending ? '확인 중...' : '중복 확인'}
+                  </button>
+                </div>
+                {emailError && (
+                  <p className="text-xs mt-1 text-red-500">{emailError}</p>
+                )}
+                {isEmailChecked && !emailError && (
+                  <p className="text-xs mt-1 text-green-500">✓ 사용 가능한 이메일입니다.</p>
+                )}
+              </div>
 
-        {/* 인증코드 입력 */}
-        {isCodeSent && !isEmailVerified && (
-          <div style={{marginBottom:16}}>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4}}>
-              <label style={{display:'block'}}>인증코드</label>
-              {verificationTimeLeft > 0 && (
-                <span style={{
-                  fontSize:14, 
-                  color: verificationTimeLeft <= 60 ? 'red' : '#666',
-                  fontWeight: verificationTimeLeft <= 60 ? 'bold' : 'normal'
-                }}>
-                  ⏱ {formatTime(verificationTimeLeft)}
-                </span>
+              {/* 인증코드 요청 버튼 */}
+              {isEmailChecked && !isEmailVerified && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleSendVerificationCode}
+                    disabled={resendCooldown > 0 || sendCodeMutation.isPending}
+                    className="w-full bg-sky-100 text-sky-700 py-3 px-4 rounded-lg font-bold hover:bg-sky-200 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendCodeMutation.isPending
+                      ? '전송 중...'
+                      : resendCooldown > 0
+                      ? `재전송 대기 중 (${formatTime(resendCooldown)})`
+                      : isCodeSent
+                      ? '인증코드 재전송'
+                      : '인증코드 받기'}
+                  </button>
+                </div>
               )}
+
+              {/* 인증코드 입력 */}
+              {isCodeSent && !isEmailVerified && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="verification-code" className="block text-sm font-medium text-slate-700">
+                      인증코드
+                    </label>
+                    {verificationTimeLeft > 0 && (
+                      <span
+                        className={`text-sm font-medium ${
+                          verificationTimeLeft <= 60 ? 'text-red-500 font-bold' : 'text-slate-500'
+                        }`}
+                      >
+                        ⏱ {formatTime(verificationTimeLeft)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      id="verification-code"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      placeholder="인증코드를 입력하세요"
+                      className="flex-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyCode}
+                      disabled={verifyCodeMutation.isPending}
+                      className="bg-sky-500 text-white px-4 py-2 rounded-md hover:bg-sky-600 transition-colors whitespace-nowrap text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {verifyCodeMutation.isPending ? '확인 중...' : '확인'}
+                    </button>
+                  </div>
+                  {codeError && <p className="text-xs mt-1 text-red-500">{codeError}</p>}
+                  {verificationTimeLeft === 0 && isCodeSent && !isEmailVerified && (
+                    <p className="text-xs mt-1 text-amber-600">
+                      ⚠ 인증 시간이 만료되었습니다. 인증코드를 재전송해주세요.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* 이메일 인증 완료 메시지 */}
+              {isEmailVerified && (
+                <div className="text-center p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-sm font-bold text-green-600">✓ 이메일 인증이 완료되었습니다.</p>
+                </div>
+              )}
+
+              {/* 비밀번호 */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+                  비밀번호
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onBlur={checkPasswordMatch}
+                  className="mt-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500"
+                  required
+                />
+              </div>
+
+              {/* 비밀번호 확인 */}
+              <div>
+                <label htmlFor="password-confirm" className="block text-sm font-medium text-slate-700">
+                  비밀번호 확인
+                </label>
+                <input
+                  type="password"
+                  id="password-confirm"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  onBlur={checkPasswordMatch}
+                  className="mt-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500"
+                  required
+                />
+                {passwordError && <p className="text-xs mt-1 text-red-500">{passwordError}</p>}
+                {password && passwordConfirm && !passwordError && (
+                  <p className="text-xs mt-1 text-green-500">✓ 비밀번호가 일치합니다.</p>
+                )}
+              </div>
+
+              {/* 회원가입 버튼 */}
+              <div>
+                <button
+                  type="submit"
+                  disabled={signUpMutation.isPending || !isEmailVerified}
+                  className="w-full bg-sky-500 text-white py-3 px-4 rounded-lg font-bold hover:bg-sky-600 transition-all disabled:bg-slate-300 disabled:cursor-not-allowed"
+                >
+                  {signUpMutation.isPending ? '가입 진행 중...' : '회원가입'}
+                </button>
+              </div>
+            </form>
+
+            {/* Login Link */}
+            <div className="mt-6 text-center text-sm text-slate-500">
+              <p>
+                이미 계정이 있으신가요?{' '}
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="font-bold text-sky-600 hover:text-sky-500"
+                >
+                  로그인
+                </button>
+              </p>
             </div>
-            <div style={{display:'flex', gap:8}}>
-              <input 
-                type="text" 
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                placeholder="인증코드를 입력하세요"
-                style={{flex:1, padding:8, boxSizing:'border-box'}} 
-              />
-              <button 
-                type="button"
-                onClick={handleVerifyCode}
-                disabled={verifyCodeMutation.isPending}
-                style={{padding:'8px 16px', whiteSpace:'nowrap'}}
-              >
-                {verifyCodeMutation.isPending ? '확인 중...' : '확인'}
-              </button>
-            </div>
-            {codeError && <p style={{color:'red', fontSize:12, margin:'4px 0 0 0'}}>{codeError}</p>}
-            {verificationTimeLeft === 0 && isCodeSent && !isEmailVerified && <p style={{color:'orange', fontSize:12, margin:'4px 0 0 0'}}>⚠ 인증 시간이 만료되었습니다. 인증코드를 재전송해주세요.</p>}
           </div>
-        )}
-
-        {isEmailVerified && (
-          <div style={{marginBottom:16}}>
-            <p style={{color:'green', fontSize:14}}>✓ 이메일 인증이 완료되었습니다</p>
-          </div>
-        )}
-
-        {/* 비밀번호 입력 */}
-        <div style={{marginBottom:16}}>
-          <label style={{display:'block', marginBottom:4}}>비밀번호</label>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onBlur={checkPasswordMatch}
-            style={{width:'100%', padding:8, boxSizing:'border-box'}} 
-          />
         </div>
-
-        {/* 비밀번호 확인 */}
-        <div style={{marginBottom:16}}>
-          <label style={{display:'block', marginBottom:4}}>비밀번호 확인</label>
-          <input 
-            type="password" 
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            onBlur={checkPasswordMatch}
-            style={{width:'100%', padding:8, boxSizing:'border-box'}} 
-          />
-          {passwordError && <p style={{color:'red', fontSize:12, margin:'4px 0 0 0'}}>{passwordError}</p>}
-          {password && passwordConfirm && !passwordError && (
-            <p style={{color:'green', fontSize:12, margin:'4px 0 0 0'}}>✓ 비밀번호가 일치합니다</p>
-          )}
-        </div>
-
-        <button 
-          type="submit"
-          disabled={signUpMutation.isPending || !isEmailVerified}
-          style={{
-            width:'100%', 
-            padding:'12px', 
-            fontSize:16, 
-            cursor: (signUpMutation.isPending || !isEmailVerified) ? 'not-allowed' : 'pointer',
-            opacity: (signUpMutation.isPending || !isEmailVerified) ? 0.6 : 1
-          }}
-        >
-          {signUpMutation.isPending ? '가입 진행 중...' : '회원가입'}
-        </button>
-      </form>
+      </main>
     </div>
   )
 }
