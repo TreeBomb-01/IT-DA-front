@@ -65,7 +65,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500"
-                  placeholder="your@email.com"
+                  placeholder=""
                 />
               </div>
 
@@ -80,7 +80,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 w-full p-3 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500"
-                  placeholder="********"
+                  placeholder=""
                 />
               </div>
 
